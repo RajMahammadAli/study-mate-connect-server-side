@@ -33,6 +33,12 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/assignments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
 
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
@@ -48,30 +54,34 @@ async function run() {
       res.send(result);
     });
 
-    // app.put("/assignments/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const options = { upsert: true };
-    //   const updateProduct = req.body;
-    //   const product = {
-    //     $set: {
-    //       image: updateProduct.image,
-    //       name: updateProduct.name,
-    //       brand: updateProduct.brand,
-    //       type: updateProduct.type,
-    //       price: updateProduct.price,
-    //       rating: updateProduct.rating,
-    //     },
-    //   };
+    app.put("/assignments/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateAssignment = req.body;
+      const assignment = {
+        $set: {
+          title: updateAssignment.title,
+          description: updateAssignment.description,
+          marks: updateAssignment.marks,
+          thumbnailImageUrl: updateAssignment.thumbnailImageUrl,
+          difficultyLevel: updateAssignment.difficultyLevel,
+          dueDate: updateAssignment.dueDate,
+        },
+      };
 
-    //   try {
-    //     const result = await userCollection.updateOne(filter, product, options);
-    //     res.send(result);
-    //   } catch (error) {
-    //     console.error("Error updating product:", error);
-    //     res.status(500).send("Internal Server Error");
-    //   }
-    // });
+      try {
+        const result = await userCollection.updateOne(
+          filter,
+          assignment,
+          options
+        );
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
