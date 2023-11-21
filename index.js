@@ -27,6 +27,7 @@ async function run() {
 
     const database = client.db("assignmentDB");
     const userCollection = database.collection("assignments");
+    const submitAssignmentCollection = database.collection("submitAssignments");
 
     app.get("/assignments", async (req, res) => {
       const cursor = userCollection.find();
@@ -40,11 +41,31 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/submitAssignments", async (req, res) => {
+      const cursor = submitAssignmentCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // app.get("/submitAssignments/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await userCollection.findOne(query);
+    //   res.send(result);
+    // });
+
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
       const result = await userCollection.insertOne(assignments);
       res.send(result);
       console.log(assignments);
+    });
+    app.post("/submitAssignments", async (req, res) => {
+      const submitAssignments = req.body;
+      const result = await submitAssignmentCollection.insertOne(
+        submitAssignments
+      );
+      res.send(result);
+      console.log(submitAssignments);
     });
 
     app.delete("/assignments/:id", async (req, res) => {
