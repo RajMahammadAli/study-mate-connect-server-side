@@ -28,22 +28,14 @@ async function run() {
     const database = client.db("assignmentDB");
     const userCollection = database.collection("assignments");
 
-    //   app.get("/products", async (req, res) => {
-    //     let query = {};
-    //     if (req.query?.email) {
-    //       query = { email: req.query.email };
-    //     }
-    //     const cursor = userCollection.find(query);
-    //     const result = await cursor.toArray();
-    //     res.send(result);
-    //   });
+    app.get("/assignments", async (req, res) => {});
 
-    //   app.post("/products", async (req, res) => {
-    //     const product = req.body;
-    //     const result = await userCollection.insertOne(product);
-    //     res.send(result);
-    //     console.log(product);
-    //   });
+    app.post("/assignments", async (req, res) => {
+      const assignments = req.body;
+      const result = await userCollection.insertOne(assignments);
+      res.send(result);
+      console.log(assignments);
+    });
 
     //   app.delete("/products/:id", async (req, res) => {
     //     const id = req.params.id;
