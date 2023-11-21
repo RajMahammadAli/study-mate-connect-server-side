@@ -46,12 +46,12 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-    // app.get("/submitAssignments/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) };
-    //   const result = await userCollection.findOne(query);
-    //   res.send(result);
-    // });
+    app.get("/submitAssignments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await submitAssignmentCollection.findOne(query);
+      res.send(result);
+    });
 
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
