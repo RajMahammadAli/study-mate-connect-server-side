@@ -28,7 +28,11 @@ async function run() {
     const database = client.db("assignmentDB");
     const userCollection = database.collection("assignments");
 
-    app.get("/assignments", async (req, res) => {});
+    app.get("/assignments", async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     app.post("/assignments", async (req, res) => {
       const assignments = req.body;
