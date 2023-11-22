@@ -103,6 +103,30 @@ async function run() {
         res.status(500).send("Internal Server Error");
       }
     });
+    app.put("/submitAssignments/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateAssignmentMark = req.body;
+      console.log(updateAssignmentMark);
+      const assignmentMark = {
+        $set: {
+          status: updateAssignmentMark.status,
+        },
+      };
+
+      try {
+        const result = await submitAssignmentCollection.updateOne(
+          filter,
+          assignmentMark,
+          options
+        );
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating assignmentMark:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
