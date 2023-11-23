@@ -1,5 +1,7 @@
 require("dotenv").config();
 const express = require("express");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -7,8 +9,34 @@ const port = process.env.PORT || 5000;
 const cors = require("cors");
 
 //middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
+
+const logger = (req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+};
+
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  console.log("token in the middleware", token);
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  jwt.verify(token, process.env.Access_Token_Secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@onlinegroupstudy.c4hijlq.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -28,6 +56,27 @@ async function run() {
     const database = client.db("assignmentDB");
     const userCollection = database.collection("assignments");
     const submitAssignmentCollection = database.collection("submitAssignments");
+
+    app.post("/jwt", logger, async (req, res) => {
+      const user = req.body;
+      console.log("user for token", user);
+      const token = jwt.sign(user, process.env.Access_Token_Secret, {
+        expiresIn: "1h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        })
+        .send({ success: true });
+    });
+
+    app.post("/logout", logger, async (req, res) => {
+      const user = req.body;
+      console.log("loging out user", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
 
     app.get("/assignments", async (req, res) => {
       const cursor = userCollection.find();
@@ -112,6 +161,8 @@ async function run() {
       const assignmentMark = {
         $set: {
           status: updateAssignmentMark.status,
+          obtainedMarks: updateAssignmentMark.obtainedMarks,
+          feedback: updateAssignmentMark.feedback,
         },
       };
 
